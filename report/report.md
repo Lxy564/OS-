@@ -42,9 +42,9 @@
 
 | 成员 | AI 编程工具 | 底层模型 | 备注 |
 |------|------------|---------|------|
-| 2411564-刘欣怡 | Claude Code | | DeepSeek-V4 | 
-| 2411846-鞠昀慧 | DeepSeek | | DeepSeek-V4 |
-| 2411690-白诗雨 | DeepSeek | | DeepSeek-V4 |
+| 2411564-刘欣怡 | Claude Code | DeepSeek-V4 | | 
+| 2411846-鞠昀慧 | DeepSeek | DeepSeek-V4 | |
+| 2411690-白诗雨 | DeepSeek | DeepSeek-V4 | |
 
 **说明：**
 - **AI 编程工具**：实验基于 WSL2 (Ubuntu) + QEMU 4.1.1 + riscv64-unknown-elf-gdb 17.2 + GCC 16.1.0。
