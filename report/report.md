@@ -174,14 +174,12 @@ First‑Fit 工作流程说明：
 #### 模块功能描述
 
 **需要实现/修改的函数：**
-
-
-static void best_fit_init(void);
-static void best_fit_init_memmap(struct Page *base, size_t n);
-static struct Page *best_fit_alloc_pages(size_t n);
-static void best_fit_free_pages(struct Page *base, size_t n);
-static size_t best_fit_nr_free_pages(void);
-
+```c
+static void buddy_init(void);
+static void buddy_init_memmap(struct Page *base, size_t n);
+static struct Page *buddy_alloc_pages(size_t n);
+static void buddy_free_pages(struct Page *base, size_t n);
+static size_t buddy_nr_free_pages(void);
 
 **功能说明：**
 
@@ -250,15 +248,12 @@ Best‑Fit 规则：分配时遍历空闲链表，挑选满足n页需求、块�
 #### 模块功能描述
 
 **需要实现/修改的函数：**
-
-
+```c
 static void buddy_init(void);
 static void buddy_init_memmap(struct Page *base, size_t n);
 static struct Page *buddy_alloc_pages(size_t n);
 static void buddy_free_pages(struct Page *base, size_t n);
 static size_t buddy_nr_free_pages(void);
-
-
 
 **功能说明：**
 
