@@ -6,6 +6,9 @@
 #include <memlayout.h>
 #include <mmu.h>
 #include <pmm.h>
+#ifdef USE_SLUB
+#include <slub.h>
+#endif
 #include <sbi.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,7 +38,12 @@ static void check_alloc_page(void);
 
 // init_pmm_manager - initialize a pmm_manager instance
 static void init_pmm_manager(void) {
+    // lab2 2411846: select the page allocator for SLUB tests.
+#ifdef USE_BUDDY
     pmm_manager = &buddy_pmm_manager;
+#else
+    pmm_manager = &best_fit_pmm_manager;
+#endif
     cprintf("memory management: %s\n", pmm_manager->name);
     pmm_manager->init();
 }
@@ -76,7 +84,7 @@ static void page_init(void) {
     mem_size = get_memory_size();
 
     // the range must start in DRAM, be non-empty and not overflow
-    if (mem_base < DRAM_BASE || mem_size == 0 || mem_base + mem_size < mem_base) {
+    if (mem_base != DRAM_BASE || mem_size == 0 || mem_base + mem_size < mem_base) {
         panic("page_init: invalid physical memory info from DTB");
     }
     mem_end = mem_base + mem_size;   // physical address, exclusive
@@ -88,6 +96,11 @@ static void page_init(void) {
 
     // npage is the first physical page number beyond DRAM;
     // page descriptors are indexed from nbase
+    // lab2 2411846: cap and align the manageable RAM limit.
+    if (mem_end > PHYSICAL_MEMORY_END) {
+        mem_end = PHYSICAL_MEMORY_END;
+    }
+    mem_end = ROUNDDOWN(mem_end, PGSIZE);
     npage = PPN(mem_end);
     if (npage <= nbase) {
         panic("page_init: memory range contains no physical page");
@@ -98,6 +111,11 @@ static void page_init(void) {
     pages = (struct Page *)ROUNDUP((uintptr_t)end, PGSIZE);
     pages_pa = PADDR((uintptr_t)pages);
     nr_page = npage - nbase;
+    // lab2 2411846: validate descriptor capacity before writing.
+    if (pages_pa >= mem_end ||
+        nr_page > (mem_end - pages_pa) / sizeof(struct Page)) {
+        panic("page_init: Page descriptors do not fit into RAM");
+    }
     pages_end_pa = pages_pa + nr_page * sizeof(struct Page);
 
     // 4. reserve every page first (OpenSBI, kernel image, page descriptors);
@@ -139,6 +157,10 @@ void pmm_init(void) {
 
     // use pmm->check to verify the correctness of the alloc/free function in a pmm
     check_alloc_page();
+#ifdef USE_SLUB
+    slub_init();
+    slub_check();
+#endif
 
     extern char boot_page_table_sv39[];
     satp_virtual = (pte_t*)boot_page_table_sv39;

@@ -10,7 +10,7 @@ GCCPREFIX := riscv64-unknown-elf-
 #endif
 
 ifndef QEMU
-QEMU := /home/sui/labcodes/lab2/lab2_new/qemu-4.1.1/riscv64-softmmu/qemu-system-riscv64
+QEMU := qemu-system-riscv64
 endif
 
 ifndef SPIKE
@@ -34,6 +34,17 @@ CFLAGS  := -mcmodel=medany -std=gnu99 -Wno-unused -Werror
 CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CFLAGS	+= -g
+# SLUB_OBJECT_LAYER
+ifeq ($(SLUB),1)
+CFLAGS += -DUSE_SLUB
+endif
+
+# lab2 2411846: local toolchain and allocator selection.
+CFLAGS += -march=rv64imac -mabi=lp64 -msmall-data-limit=0
+ifeq ($(PMM),buddy)
+CFLAGS += -DUSE_BUDDY
+endif
+
 CFLAGS2 = $(CFLAGS) -D ucore_test
 CTYPE	:= c S
 LD      := $(GCCPREFIX)ld
@@ -238,3 +249,12 @@ tags:
 	$(V)find . -type f -name "*.[chS]" >cscope.files
 	$(V)cscope -bq 
 	$(V)ctags -L cscope.files
+
+.PHONY: qemu-slub qemu-slub-buddy
+qemu-slub:
+	$(MAKE) clean
+	$(MAKE) SLUB=1 qemu
+
+qemu-slub-buddy:
+	$(MAKE) clean
+	$(MAKE) PMM=buddy SLUB=1 qemu
