@@ -107,6 +107,7 @@ static void page_init(void);
 4. 所有用到的变量必须显式定义，禁止出现未定义变量（禁止nbase这类未声明变量）。
 允许使用的资源： get_memory_base()、get_memory_size()、panic()、cprintf()、init_memmap()、pa2page() 链接符号 end[]，结构体 struct Page； 框架提供宏：PGSIZE、ROUNDUP、ROUNDDOWN、PADDR、KADDR、SetPageReserved、set_page_ref。
 输出要求： 仅输出完整的 page_init 函数代码，ucore 原版风格，附带简短注释，不修改文件中其他已有代码，代码可以直接编译通过。
+
 ````
 
 #### 实现迭代过程
@@ -180,6 +181,7 @@ static void buddy_init_memmap(struct Page *base, size_t n);
 static struct Page *buddy_alloc_pages(size_t n);
 static void buddy_free_pages(struct Page *base, size_t n);
 static size_t buddy_nr_free_pages(void);
+```
 
 **功能说明：**
 
@@ -254,7 +256,7 @@ static void buddy_init_memmap(struct Page *base, size_t n);
 static struct Page *buddy_alloc_pages(size_t n);
 static void buddy_free_pages(struct Page *base, size_t n);
 static size_t buddy_nr_free_pages(void);
-
+```
 **功能说明：**
 
 Buddy System 将内存按 2 的幂次方进行划分，使用一组空闲链表（桶，bucket）来管理。分配时，将请求大小向上取整为 2 的幂次，如果对应桶为空，则去更大的桶找，找到后不断对半拆分（分裂）并将另一半放入较小编号的桶中。释放时，检查其 “伙伴块” 是否也空闲，若是则合并，并递归向上。
