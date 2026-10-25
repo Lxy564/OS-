@@ -403,11 +403,10 @@ struct pmm_manager {
 > 环境一共开启三个终端窗口：
 > 
 > 
-> - 终端 1：执行 `make debug`，启动 QEMU 模拟器，等待 GDB 连接，不做输入操作。
-> - 终端 3（优先连接）：执行 `make gdb`，通过 `target remote :1234` 远程调试 ucore 内核，设置断点 `b kern_init`，此时不执行继续。
-> - 终端 2：使用 gdb attach QEMU 进程 PID；设置信号处理 `handle SIGPIPE nostop noprint`；在 TLB 缺失入口下断点 `b riscv_cpu_tlb_fill`。
-> - 最后回到终端 3 输入 `c`，内核运行到 `kern_init`；使用 `si` 单步汇编指令。
-> - 当执行取指、load、store 访存指令时，终端 2 会命中 `riscv_cpu_tlb_fill` 断点；命中后执行 `info args`，打印虚拟地址、访问类型等参数，完成观测；输入`c`放行继续执行。
+- 终端 1：执行 `make debug`，启动 QEMU 模拟器，等待 GDB 连接，该终端保持不动。
+- 终端 2：使用 gdb attach 绑定 QEMU 进程 PID；设置信号处理 `handle SIGPIPE nostop noprint`；在TLB缺失入口下断点 `b riscv_cpu_tlb_fill`，输入 `c` 继续。
+- 终端 3：执行 `make gdb`，设置断点 `b kern_init`，然后输入 `c`。
+- 当CPU执行取指、load、store访存指令发生TLB缺失时，终端2会命中 `riscv_cpu_tlb_fill` 断点；命中后执行 `info args`，打印虚拟地址、访问类型等参数，完成观测；观测完毕输入 `c` 放行，继续执行。
 
 3. 截图图像分析：
 调试一共捕获三类 TLB 缺失场景，截图见 **Figure 3、Figure 4、Figure 5**。
